@@ -3,12 +3,13 @@ package codes
 import (
 	"runtime"
 
+	"github.com/BCM-ENERGY-team/go-eccodes/log"
 	"github.com/BCM-ENERGY-team/go-eccodes/native"
 	"github.com/pkg/errors"
 )
 
 type File interface {
-	IsOpen() bool
+	isOpen() bool
 	Native() native.CFILE
 	Close() error
 }
@@ -30,7 +31,7 @@ func OpenFile(filename string, mode string) (File, error) {
 	return f, nil
 }
 
-func (f *file) IsOpen() bool {
+func (f *file) isOpen() bool {
 	return f.file != nil
 }
 
@@ -48,8 +49,8 @@ func (f *file) Close() error {
 }
 
 func fileFinalizer(f *file) {
-	if f.IsOpen() {
-		logMemoryLeak.Printf("file '%s' mode '%s' is not closed", f.filename, f.mode)
+	if f.isOpen() {
+		log.LogMemoryLeak.Printf("file '%s' mode '%s' is not closed", f.filename, f.mode)
 		f.Close()
 	}
 }

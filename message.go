@@ -1,17 +1,35 @@
 package codes
 
-import "github.com/pkg/errors"
-
 type Message interface {
+	Parameters() map[string]string
+	Latitudes() []float64
+	Longitudes() []float64
+	Values() []float64
 }
 
 type message struct {
+	parameters map[string]string
+	latitudes []float64
+	longitudes []float64
+	values []float64
 }
 
-func NewMessage(handle Handle) (Message, error) {
-	// TODO: read all keys
+func (m *message) Parameters() map[string]string {
+	return m.parameters
+}
 
-	// TODO: read values
+func (m *message) Latitudes() []float64 {
+	return m.latitudes
+}
 
-	return nil, errors.New("not implemented")
+func (m *message) Longitudes() []float64 {
+	return m.longitudes
+}
+
+func (m *message) Values() []float64 {
+	return m.values
+}
+
+func newMessage(parameters map[string]string, latitudes []float64, longitudes []float64, values []float64) Message {
+	return &message{parameters:parameters, latitudes:latitudes, longitudes:longitudes, values:values}
 }

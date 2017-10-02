@@ -11,12 +11,20 @@
       <w>clong</w>
       <w>csize</w>
       <w>cstrerror</w>
+      <w>eccodes</w>
       <w>errno</w>
       <w>fclose</w>
       <w>fopen</w>
       <w>grib</w>
       <w>kiter</w>
+      <w>libaec</w>
+      <w>libjasper</w>
+      <w>libjpeg</w>
+      <w>libopenjpeg</w>
+      <w>libpng</w>
+      <w>nctx</w>
       <w>strerror</w>
+      <w>zlib</w>
     </words>
   </dictionary>
 </component>

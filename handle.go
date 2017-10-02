@@ -6,21 +6,21 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/BCM-ENERGY-team/go-eccodes/log"
 	"github.com/BCM-ENERGY-team/go-eccodes/native"
 )
-
-type Handle interface {
-	IsOpen() bool
-	Native() native.Ccodes_handle
-	Close() error
-}
 
 type handle struct {
 	handle native.Ccodes_handle
 }
 
-func NewHandle(ctx Context, file File, product int) (Handle, error) {
-	hp, err := native.Ccodes_handle_new_from_file(ctx.Native(), file.Native(), product)
+func newHandleFromFile(ctx Context, file File, product int) (*handle, error) {
+	var nctx native.Ccodes_context
+	if ctx != nil {
+		nctx = ctx.native()
+	}
+
+	hp, err := native.Ccodes_handle_new_from_file(nctx, file.Native(), product)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err
@@ -34,8 +34,8 @@ func NewHandle(ctx Context, file File, product int) (Handle, error) {
 	return h, nil
 }
 
-func newHandleFromIndex(index Index) (Handle, error) {
-	hp, err := native.Ccodes_handle_new_from_index(index.Native())
+func newHandleFromIndex(index native.Ccodes_index) (*handle, error) {
+	hp, err := native.Ccodes_handle_new_from_index(index)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err
@@ -53,11 +53,11 @@ func (h *handle) IsOpen() bool {
 	return h.handle != nil
 }
 
-func (h *handle) Native() native.Ccodes_handle {
+func (h *handle) native() native.Ccodes_handle {
 	return h.handle
 }
 
-func (h *handle) Close() error {
+func (h *handle) close() error {
 	defer func() { h.handle = nil }()
 	err := native.Ccodes_handle_delete(h.handle)
 	if err != nil {
@@ -68,7 +68,7 @@ func (h *handle) Close() error {
 
 func handleFinalizer(h *handle) {
 	if h.IsOpen() {
-		logMemoryLeak.Print("handle is not closed")
-		h.Close()
+		log.LogMemoryLeak.Print("handle is not closed")
+		h.close()
 	}
 }

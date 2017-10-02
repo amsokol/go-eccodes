@@ -6,34 +6,52 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/BCM-ENERGY-team/go-eccodes/log"
 	"github.com/BCM-ENERGY-team/go-eccodes/native"
+	"github.com/BCM-ENERGY-team/go-eccodes/product"
 )
 
 type Index interface {
-	IsOpen() bool
-	Native() native.Ccodes_index
-	Next() (Message, error)
-	Close()
+	isOpenIndex() bool
+	isOpenFile() bool
+	Next(ctx Context) (MessageStub, error)
+	Close() error
 }
 
 type index struct {
 	index native.Ccodes_index
-	keys  []Key
+	file  File
 }
 
-func NewIndex(ctx Context, filename string, keys []Key) (Index, error) {
-	if keys == nil || len(keys) == 0 {
-		return nil, errors.New("key list is empty")
+func newIndexByFile(filename string, mode string) (Index, error) {
+	file, err := OpenFile(filename, mode)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open file")
+	}
+
+	return NewIndexForFile(file)
+}
+
+func NewIndexForFile(file File) (Index, error) {
+	idx := &index{file: file}
+	runtime.SetFinalizer(idx, indexFinalizer)
+
+	return idx, nil
+}
+
+func NewIndex(ctx Context, filename string, mode string, filter map[string]interface{}) (Index, error) {
+	if filter == nil || len(filter) == 0 {
+		return newIndexByFile(filename, mode)
 	}
 
 	var k string
-	for _, key := range keys {
+	for key, value := range filter {
 		if len(k) > 0 {
 			k += ","
 		}
-		k += key.Name
-		if key.Value != nil {
-			switch key.Value.(type) {
+		k += key
+		if value != nil {
+			switch value.(type) {
 			case int64:
 				k += ":l"
 			case float64:
@@ -44,73 +62,106 @@ func NewIndex(ctx Context, filename string, keys []Key) (Index, error) {
 		}
 	}
 
-	ip, err := native.Ccodes_index_new_from_file(ctx.Native(), filename, k)
+	var nctx native.Ccodes_context
+	if ctx != nil {
+		nctx = ctx.native()
+	}
+
+	i, err := native.Ccodes_index_new_from_file(nctx, filename, k)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create index")
 	}
 
-	for _, key := range keys {
-		if key.Value != nil {
+	for key, value := range filter {
+		if value != nil {
 			err = nil
-			switch key.Value.(type) {
+			switch value.(type) {
 			case int64:
-				err = native.Ccodes_index_select_long(ip, key.Name, key.Value.(int64))
+				err = native.Ccodes_index_select_long(i, key, value.(int64))
 				if err != nil {
-					err = errors.Wrapf(err, "failed to select '%s'=%d", key.Name, key.Value.(int64))
+					err = errors.Wrapf(err, "failed to select '%s'=%d", key, value.(int64))
 				}
 			case float64:
-				err = native.Ccodes_index_select_double(ip, key.Name, key.Value.(float64))
+				err = native.Ccodes_index_select_double(i, key, value.(float64))
 				if err != nil {
-					err = errors.Wrapf(err, "failed to select '%s'=%f", key.Name, key.Value.(float64))
+					err = errors.Wrapf(err, "failed to select '%s'=%f", key, value.(float64))
 				}
 			case string:
-				err = native.Ccodes_index_select_string(ip, key.Name, key.Value.(string))
+				err = native.Ccodes_index_select_string(i, key, value.(string))
 				if err != nil {
-					err = errors.Wrapf(err, "failed to select '%s'='%s'", key.Name, key.Value.(string))
+					err = errors.Wrapf(err, "failed to select '%s'='%s'", key, value.(string))
 				}
 			}
 			if err != nil {
-				native.Ccodes_index_delete(ip)
+				native.Ccodes_index_delete(i)
 				return nil, err
 			}
 		}
 	}
 
-	idx := &index{index: ip, keys: keys}
+	idx := &index{index: i}
 	runtime.SetFinalizer(idx, indexFinalizer)
 
 	return idx, nil
 }
 
-func (i *index) IsOpen() bool {
+func (i *index) isOpenIndex() bool {
 	return i.index != nil
 }
 
-func (i *index) Native() native.Ccodes_index {
-	return i.index
+func (i *index) isOpenFile() bool {
+	return i.file != nil && i.file.isOpen()
 }
 
-func (i *index) Next() (Message, error) {
-	handle, err := newHandleFromIndex(i)
+func (i *index) nextFromIndex() (MessageStub, error) {
+	handle, err := newHandleFromIndex(i.index)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err
 		}
 		return nil, errors.Wrap(err, "failed create new handle")
 	}
-	defer handle.Close()
 
-	return NewMessage(handle)
+	return newMessageStub(handle), nil
 }
 
-func (i *index) Close() {
-	defer func() { i.index = nil }()
-	native.Ccodes_index_delete(i.index)
+func (i *index) nextFromFile(ctx Context) (MessageStub, error) {
+	handle, err := newHandleFromFile(ctx, i.file, product.ProductAny)
+	if err != nil {
+		if err == io.EOF {
+			return nil, err
+		}
+		return nil, errors.Wrap(err, "failed create new handle")
+	}
+
+	return newMessageStub(handle), nil
+}
+
+func (i *index) Next(ctx Context) (MessageStub, error) {
+	if i.isOpenIndex() {
+		return i.nextFromIndex()
+	}
+	if i.isOpenFile() {
+		return i.nextFromFile(ctx)
+	}
+	return nil, errors.New("index is closed")
+}
+
+func (i *index) Close() error {
+	if i.isOpenIndex() {
+		defer func() { i.index = nil }()
+		native.Ccodes_index_delete(i.index)
+	}
+	if i.isOpenFile() {
+		defer func() { i.index = nil }()
+		return i.file.Close()
+	}
+	return nil
 }
 
 func indexFinalizer(i *index) {
-	if i.IsOpen() {
-		logMemoryLeak.Print("index is not closed")
+	if i.isOpenIndex() || i.isOpenFile() {
+		log.LogMemoryLeak.Print("index is not closed")
 		i.Close()
 	}
 }
