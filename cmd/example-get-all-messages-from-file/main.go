@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"runtime/debug"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -24,6 +25,8 @@ func main() {
 
 	n := 0
 	for {
+		start := time.Now()
+
 		msg, err := next(index)
 		if err != nil {
 			if err == io.EOF {
@@ -39,6 +42,7 @@ func main() {
 
 		log.Printf("Variable = [%s](%s)\n", shortName, name)
 
+		log.Printf("elapsed=%f seconds", time.Since(start).Seconds())
 		log.Printf("============= END MESSAGE N%d ============\n\n", n)
 		n++
 
