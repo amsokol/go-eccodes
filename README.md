@@ -102,7 +102,7 @@ rm -r ./jasper-version-1.900.24
 cd ..
 ```
 
-#### Build end install [libjasper](https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home)
+#### Build end install [libeccodes](https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home)
 
 ```bash
 cd ./contrib
