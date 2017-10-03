@@ -108,15 +108,15 @@ cd ..
 
 ```bash
 cd ./contrib
-tar -xzf eccodes-2.4.1-Source.tar.gz
+tar -xzf eccodes-2.5.0-Source.tar.gz
 mkdir build
 cd build
-cmake -DBUILD_SHARED_LIBS=OFF -DENABLE_NETCDF=OFF -DENABLE_JPG=ON -DENABLE_PNG=ON -DENABLE_AEC=ON -DENABLE_PYTHON=OFF -DENABLE_FORTRAN=OFF -DENABLE_MEMFS=ON ../eccodes-2.4.1-Source
+cmake -DBUILD_SHARED_LIBS=OFF -DENABLE_NETCDF=OFF -DENABLE_JPG=ON -DENABLE_PNG=ON -DENABLE_AEC=ON -DENABLE_PYTHON=OFF -DENABLE_FORTRAN=OFF -DENABLE_MEMFS=ON ../eccodes-2.5.0-Source
 make
 ctest
 sudo make install
 cd ..
 rm -r ./build
-rm -r ./eccodes-2.4.1-Source
+rm -r ./eccodes-2.5.0-Source
 cd ..
 ```
