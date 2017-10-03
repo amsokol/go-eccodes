@@ -91,14 +91,16 @@ cd ..
 
 ```bash
 cd ./contrib
-tar -xzf jasper-version-1.900.24.tar.gz
-cd jasper-version-1.900.24
-autoreconf -i
-./configure --disable-shared
-make
+tar -xzf jasper-version-2.0.14.tar.gz
+mkdir build
+cd build
+cmake -DJAS_ENABLE_SHARED=false ../jasper-version-2.0.14
+make clean all
+make test
 sudo make install
 cd ..
-rm -r ./jasper-version-1.900.24
+rm -r ./build
+rm -r ./jasper-version-2.0.14
 cd ..
 ```
 
