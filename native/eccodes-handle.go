@@ -10,8 +10,6 @@ import (
 	"unsafe"
 
 	"github.com/pkg/errors"
-
-	p "github.com/BCM-ENERGY-team/go-eccodes/product"
 )
 
 func Ccodes_handle_new_from_index(index Ccodes_index) (Ccodes_handle, error) {
@@ -30,23 +28,6 @@ func Ccodes_handle_new_from_index(index Ccodes_index) (Ccodes_handle, error) {
 
 func Ccodes_handle_new_from_file(ctx Ccodes_context, file CFILE, product int) (Ccodes_handle, error) {
 	var cProduct C.int
-
-	switch product {
-	case p.ProductAny:
-		cProduct = C.PRODUCT_ANY
-	case p.ProductGRIB:
-		cProduct = C.PRODUCT_GRIB
-	case p.ProductBUFR:
-		cProduct = C.PRODUCT_BUFR
-	case p.ProductMETAR:
-		cProduct = C.PRODUCT_METAR
-	case p.ProductGTS:
-		cProduct = C.PRODUCT_GTS
-	case p.ProductTAF:
-		cProduct = C.PRODUCT_TAF
-	default:
-		return nil, errors.Errorf("unknown product kind: %d", product)
-	}
 
 	var err Cint
 	cError := (*C.int)(unsafe.Pointer(&err))

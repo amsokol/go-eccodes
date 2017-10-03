@@ -9,7 +9,6 @@ import (
 	"github.com/BCM-ENERGY-team/go-eccodes/debug"
 	cio "github.com/BCM-ENERGY-team/go-eccodes/io"
 	"github.com/BCM-ENERGY-team/go-eccodes/native"
-	"github.com/BCM-ENERGY-team/go-eccodes/product"
 )
 
 type Reader interface {
@@ -101,7 +100,7 @@ func OpenFileByPathWithFilter(path string, mode string, filter map[string]interf
 }
 
 func (f *file) Next() (Message, error) {
-	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), productAny)
+	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), native.ProductAny)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err
