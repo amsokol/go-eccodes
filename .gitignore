@@ -12,7 +12,5 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
-Gopkg.lock
-vendor/
 .idea/inspectionProfiles/
 .idea/workspace.xml
