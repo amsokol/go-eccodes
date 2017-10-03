@@ -30,7 +30,7 @@ func Cfopen(filename string, mode string) (CFILE, error) {
 func Cfclose(file CFILE) error {
 	res := C.fclose((*C.FILE)(file))
 	if res != 0 {
-		return errors.New("failed to close file")
+		return errors.New("failed to close io")
 	}
 	return nil
 }

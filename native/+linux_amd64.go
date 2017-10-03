@@ -11,4 +11,4 @@ type Cint = int32
 type Clong = int64
 type Culong = uint64
 type Cdouble = float64
-type Csize_t = int64
+type CsizeT = int64

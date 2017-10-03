@@ -13,25 +13,24 @@ import (
 )
 
 func main() {
-	filename := flag.String("file", "", "file path, e.g. /tmp/ARPEGE_0.1_SP1_00H12H_201709290000.grib2")
+	filename := flag.String("file", "", "io path, e.g. /tmp/ARPEGE_0.1_SP1_00H12H_201709290000.grib2")
 
 	flag.Parse()
 
+	// get all messages where level=2
 	filter := map[string]interface{}{
-		"level": int64(10),
+		"level": int64(2),
 	}
 
-	index, err := codes.NewIndex(nil, *filename, "r", filter)
+	file, err := codes.OpenFileByPathWithFilter(*filename, "r", filter)
 	if err != nil {
-		log.Fatalf("failed to create index for file: %s", err.Error())
+		log.Fatalf("failed to open file: %s", err.Error())
 	}
-	defer index.Close()
+	defer file.Close()
 
 	n := 0
 	for {
-		start := time.Now()
-
-		msg, err := next(index)
+		err = process(file, n)
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -39,32 +38,42 @@ func main() {
 			log.Fatalf("failed to get message (#%d) from index: %s", n, err.Error())
 		}
 
-		log.Printf("============= BEGIN MESSAGE N%d ==========\n", n)
-
-		shortName, _ := msg.Parameters()["shortName"]
-		name, _ := msg.Parameters()["name"]
-
-		log.Printf("Variable = [%s](%s)\n", shortName, name)
-
-		log.Printf("elapsed=%f seconds", time.Since(start).Seconds())
-		log.Printf("============= END MESSAGE N%d ============\n\n", n)
 		n++
-
-		debug.FreeOSMemory()
 	}
 }
 
-func next(index codes.Index) (codes.Message, error) {
-	ms, err := index.Next(nil)
-	if err != nil {
-		return nil, err
-	}
-	defer ms.Close()
+func process(file codes.File, n int) error {
+	start := time.Now()
 
-	msg, err := ms.Message()
+	msg, err := file.Next()
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get message from message stub")
+		return err
+	}
+	defer msg.Close()
+
+	log.Printf("============= BEGIN MESSAGE N%d ==========\n", n)
+
+	shortName, err := msg.GetString("shortName")
+	if err != nil {
+		return errors.Wrap(err, "failed to get 'shortName' value")
+	}
+	name, err := msg.GetString("name")
+	if err != nil {
+		return errors.Wrap(err, "failed to get 'name' value")
 	}
 
-	return msg, nil
+	log.Printf("Variable = [%s](%s)\n", shortName, name)
+
+	// just to measure timing
+	_, _, _, err = msg.Data()
+	if err != nil {
+		return errors.Wrap(err, "failed to get data (latitudes, longitudes, values)")
+	}
+
+	log.Printf("elapsed=%.0f ms", time.Since(start).Seconds()*1000)
+	log.Printf("============= END MESSAGE N%d ============\n\n", n)
+
+	debug.FreeOSMemory()
+
+	return nil
 }

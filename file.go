@@ -1,56 +1,147 @@
 package codes
 
 import (
+	"io"
 	"runtime"
 
-	"github.com/BCM-ENERGY-team/go-eccodes/log"
-	"github.com/BCM-ENERGY-team/go-eccodes/native"
 	"github.com/pkg/errors"
+
+	"github.com/BCM-ENERGY-team/go-eccodes/debug"
+	cio "github.com/BCM-ENERGY-team/go-eccodes/io"
+	"github.com/BCM-ENERGY-team/go-eccodes/native"
+	"github.com/BCM-ENERGY-team/go-eccodes/product"
 )
 
+type Reader interface {
+	Next() (Message, error)
+}
+
+type Writer interface {
+}
+
 type File interface {
-	isOpen() bool
-	Native() native.CFILE
-	Close() error
+	Reader
+	Writer
+	Close()
 }
 
 type file struct {
-	filename string
-	mode     string
-	file     native.CFILE
+	file cio.File
 }
 
-func OpenFile(filename string, mode string) (File, error) {
-	fp, err := native.Cfopen(filename, mode)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed open file '%s' mode '%s'", filename, mode)
+type fileIndexed struct {
+	index native.Ccodes_index
+}
+
+var emptyFilter = map[string]interface{}{}
+
+func OpenFile(f cio.File) (File, error) {
+	return &file{file: f}, nil
+}
+
+func OpenFileByPathWithFilter(path string, mode string, filter map[string]interface{}) (File, error) {
+	if filter == nil {
+		filter = emptyFilter
 	}
 
-	f := &file{filename: filename, mode: mode, file: fp}
-	runtime.SetFinalizer(f, fileFinalizer)
-	return f, nil
-}
-
-func (f *file) isOpen() bool {
-	return f.file != nil
-}
-
-func (f *file) Native() native.CFILE {
-	return f.file
-}
-
-func (f *file) Close() error {
-	defer func() { f.file = nil }()
-	err := native.Cfclose(f.file)
-	if err != nil {
-		return errors.Wrapf(err, "failed to close '%s' mode '%s'", f.filename, f.mode)
+	var k string
+	for key, value := range filter {
+		if len(k) > 0 {
+			k += ","
+		}
+		k += key
+		if value != nil {
+			switch value.(type) {
+			case int64:
+				k += ":l"
+			case float64:
+				k += ":d"
+			case string:
+				k += ":s"
+			}
+		}
 	}
-	return nil
+
+	i, err := native.Ccodes_index_new_from_file(nil, path, k)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create filtered index")
+	}
+
+	for key, value := range filter {
+		if value != nil {
+			err = nil
+			switch value.(type) {
+			case int64:
+				err = native.Ccodes_index_select_long(i, key, value.(int64))
+				if err != nil {
+					err = errors.Wrapf(err, "failed to set filter condition '%s'=%d", key, value.(int64))
+				}
+			case float64:
+				err = native.Ccodes_index_select_double(i, key, value.(float64))
+				if err != nil {
+					err = errors.Wrapf(err, "failed to set filter condition '%s'=%f", key, value.(float64))
+				}
+			case string:
+				err = native.Ccodes_index_select_string(i, key, value.(string))
+				if err != nil {
+					err = errors.Wrapf(err, "failed to set filter condition '%s'='%s'", key, value.(string))
+				}
+			}
+			if err != nil {
+				native.Ccodes_index_delete(i)
+				return nil, err
+			}
+		}
+	}
+
+	file := &fileIndexed{index: i}
+	runtime.SetFinalizer(file, fileIndexedFinalizer)
+
+	return file, nil
 }
 
-func fileFinalizer(f *file) {
+func (f *file) Next() (Message, error) {
+	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), product.ProductAny)
+	if err != nil {
+		if err == io.EOF {
+			return nil, err
+		}
+		return nil, errors.Wrap(err, "failed create new handle from file")
+	}
+
+	return newMessage(handle), nil
+}
+
+func (f *file) Close() {
+	f.file = nil
+}
+
+func (f *fileIndexed) isOpen() bool {
+	return f.index != nil
+}
+
+func (f *fileIndexed) Next() (Message, error) {
+	handle, err := native.Ccodes_handle_new_from_index(f.index)
+	if err != nil {
+		if err == io.EOF {
+			return nil, err
+		}
+		return nil, errors.Wrap(err, "failed to create handle from index")
+	}
+
+	return newMessage(handle), nil
+}
+
+func (f *fileIndexed) Close() {
 	if f.isOpen() {
-		log.LogMemoryLeak.Printf("file '%s' mode '%s' is not closed", f.filename, f.mode)
+		defer func() { f.index = nil }()
+		native.Ccodes_index_delete(f.index)
+	}
+}
+
+func fileIndexedFinalizer(f *fileIndexed) {
+	if f.isOpen() {
+		debug.MemoryLeakLogger.Print("file is not closed")
 		f.Close()
 	}
 }

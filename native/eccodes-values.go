@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/BCM-ENERGY-team/go-eccodes/log"
+	"github.com/BCM-ENERGY-team/go-eccodes/debug"
 )
 
 const MaxStringLength = 1030
@@ -71,7 +71,7 @@ func Ccodes_get_string(handle Ccodes_handle, key string) (string, error) {
 	cKey := C.CString(key)
 	defer C.free(unsafe.Pointer(cKey))
 
-	length := Csize_t(MaxStringLength)
+	length := CsizeT(MaxStringLength)
 	cLength := (*C.size_t)(unsafe.Pointer(&length))
 
 	err := C.codes_get_length((*C.codes_handle)(handle), cKey, cLength)
@@ -85,7 +85,7 @@ func Ccodes_get_string(handle Ccodes_handle, key string) (string, error) {
 	var result []byte
 
 	if length > MaxStringLength {
-		log.LogMemoryLeak.Printf("unnecessary memory allocation - length of '%s' value is %d greater than MaxStringLength=%d",
+		debug.MemoryLeakLogger.Printf("unnecessary memory allocation - length of '%s' value is %d greater than MaxStringLength=%d",
 			key, int(length), MaxStringLength)
 		result = make([]byte, length)
 	} else {
