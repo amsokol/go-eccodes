@@ -51,9 +51,9 @@ func OpenFileByPathWithFilter(path string, mode string, filter map[string]interf
 		k += key
 		if value != nil {
 			switch value.(type) {
-			case int64:
+			case int64, int:
 				k += ":l"
-			case float64:
+			case float64, float32:
 				k += ":d"
 			case string:
 				k += ":s"
@@ -75,8 +75,18 @@ func OpenFileByPathWithFilter(path string, mode string, filter map[string]interf
 				if err != nil {
 					err = errors.Wrapf(err, "failed to set filter condition '%s'=%d", key, value.(int64))
 				}
+			case int:
+				err = native.Ccodes_index_select_long(i, key, int64(value.(int)))
+				if err != nil {
+					err = errors.Wrapf(err, "failed to set filter condition '%s'=%d", key, value.(int64))
+				}
 			case float64:
 				err = native.Ccodes_index_select_double(i, key, value.(float64))
+				if err != nil {
+					err = errors.Wrapf(err, "failed to set filter condition '%s'=%f", key, value.(float64))
+				}
+			case float32:
+				err = native.Ccodes_index_select_double(i, key, float64(value.(float32)))
 				if err != nil {
 					err = errors.Wrapf(err, "failed to set filter condition '%s'=%f", key, value.(float64))
 				}

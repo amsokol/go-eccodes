@@ -19,7 +19,7 @@ func main() {
 
 	// get all messages where level=2
 	filter := map[string]interface{}{
-		"level": int64(2),
+		"level": 2,
 	}
 
 	file, err := codes.OpenFileByPathWithFilter(*filename, "r", filter)
