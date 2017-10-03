@@ -101,7 +101,7 @@ func OpenFileByPathWithFilter(path string, mode string, filter map[string]interf
 }
 
 func (f *file) Next() (Message, error) {
-	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), product.ProductAny)
+	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), productAny)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err
