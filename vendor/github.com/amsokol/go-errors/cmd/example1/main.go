@@ -40,7 +40,7 @@ func f32() error {
 }
 
 func f33() error {
-	return errors.Newff("cause from f23", errors.Fields{"t": "tttt"})
+	return errors.Newff(errors.Fields{"t": "tttt"}, "cause from f23")
 }
 
 func main() {

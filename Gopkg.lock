@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/amsokol/go-errors"
   packages = ["."]
-  revision = "541a9aea04eb732bf87491885395df66bac8fd40"
+  revision = "ba7835dc54275b276a2a0293ba51ea7b5478b286"
 
 [solve-meta]
   analyzer-name = "dep"

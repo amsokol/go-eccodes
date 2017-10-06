@@ -96,30 +96,21 @@ func Newf(msg string, a ...interface{}) error {
 }
 
 // New returns error with caller
-func Newff(msg string, fields Fields, a ...interface{}) error {
+func Newff(fields Fields, msg string, a ...interface{}) error {
 	return wrap(nil, fields, msg, a...)
 }
 
 // Wrap returns error wrapped by caller info if 'err' is not nil
 func Wrap(err error, msg string) error {
-	if err == nil {
-		return nil
-	}
 	return wrap(err, Fields{}, msg)
 }
 
 // Wrapf returns error wrapped by message and caller info if 'err' is not nil
 func Wrapf(err error, msg string, a ...interface{}) error {
-	if err == nil {
-		return nil
-	}
 	return wrap(err, Fields{}, msg, a...)
 }
 
 // Wrapf returns error wrapped by message and caller info if 'err' is not nil
 func Wrapff(err error, fields Fields, msg string, a ...interface{}) error {
-	if err == nil {
-		return nil
-	}
 	return wrap(err, fields, msg, a...)
 }

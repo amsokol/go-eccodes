@@ -6,12 +6,16 @@ import (
 )
 
 type Message interface {
-	String() string
+	Message() string
 }
 
 type message struct {
 	msg    string
 	fields fields
+}
+
+func (m *message) Message() string {
+	return m.String()
 }
 
 func (m *message) String() string {
