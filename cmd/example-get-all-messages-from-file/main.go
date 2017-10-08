@@ -1,5 +1,10 @@
 package main
 
+/*
+#cgo LDFLAGS: -leccodes -leccodes_memfs -lpng -laec -ljasper -lopenjp2 -lz -lm
+*/
+import "C"
+
 import (
 	"flag"
 	"io"
@@ -9,9 +14,10 @@ import (
 
 	"github.com/amsokol/go-errors"
 
-	"github.com/BCM-ENERGY-team/go-eccodes"
-	cio "github.com/BCM-ENERGY-team/go-eccodes/io"
+	"github.com/amsokol/go-eccodes"
+	cio "github.com/amsokol/go-eccodes/io"
 )
+
 
 func main() {
 	filename := flag.String("file", "", "io path, e.g. /tmp/ARPEGE_0.1_SP1_00H12H_201709290000.grib2")

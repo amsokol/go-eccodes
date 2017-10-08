@@ -6,9 +6,9 @@ import (
 
 	"github.com/amsokol/go-errors"
 
-	"github.com/BCM-ENERGY-team/go-eccodes/debug"
-	cio "github.com/BCM-ENERGY-team/go-eccodes/io"
-	"github.com/BCM-ENERGY-team/go-eccodes/native"
+	"github.com/amsokol/go-eccodes/debug"
+	cio "github.com/amsokol/go-eccodes/io"
+	"github.com/amsokol/go-eccodes/native"
 )
 
 type Reader interface {
@@ -38,7 +38,7 @@ func OpenFile(f cio.File) (File, error) {
 	return &file{file: f}, nil
 }
 
-func OpenFileByPathWithFilter(path string, mode string, filter map[string]interface{}) (File, error) {
+func OpenFileByPathWithFilter(path string, filter map[string]interface{}) (File, error) {
 	if filter == nil {
 		filter = emptyFilter
 	}

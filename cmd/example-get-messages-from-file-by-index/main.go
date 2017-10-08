@@ -9,7 +9,7 @@ import (
 
 	"github.com/amsokol/go-errors"
 
-	"github.com/BCM-ENERGY-team/go-eccodes"
+	"github.com/amsokol/go-eccodes"
 )
 
 func main() {

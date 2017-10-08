@@ -18,7 +18,7 @@ cd ./contrib
 tar -xzf zlib-1.2.11.tar.gz
 cd zlib-1.2.11
 make distclean
-./configure --static
+./configure --static 
 make
 sudo make install
 cd ..
@@ -51,7 +51,6 @@ cd build
 make check
 sudo make install
 cd ../..
-cd ..
 rm -r ./libaec-1.0.1
 cd ..
 ```
@@ -79,7 +78,7 @@ tar -xzf openjpeg-2.1.2.tar.gz
 cd openjpeg-2.1.2
 mkdir build
 cd build
-cmake -DBUILD\_SHARED\_LIBS:bool=OFF -DBUILD_THIRDPARTY:bool=ON ..
+cmake -DBUILD_SHARED_LIBS:bool=OFF -DBUILD_THIRDPARTY:bool=ON ..
 make
 sudo make install
 cd ../..
