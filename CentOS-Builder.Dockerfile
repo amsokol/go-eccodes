@@ -80,6 +80,7 @@ RUN mkdir build && \
     cmake3 -DBUILD_SHARED_LIBS=OFF -DENABLE_NETCDF=OFF -DENABLE_JPG=ON -DENABLE_PNG=ON -DENABLE_AEC=ON \
         -DENABLE_PYTHON=OFF -DENABLE_FORTRAN=OFF -DENABLE_MEMFS=ON ../eccodes-2.5.0-Source && \
     make && \
+    ctest3 && \
     make install && \
     cd .. && \
     rm -r ./build && \
