@@ -22,7 +22,7 @@ func main() {
 		"level": 2,
 	}
 
-	file, err := codes.OpenFileByPathWithFilter(*filename, "r", filter)
+	file, err := codes.OpenFileByPathWithFilter(*filename, filter)
 	if err != nil {
 		log.Fatalf("failed to open file: %s", err.Error())
 	}
