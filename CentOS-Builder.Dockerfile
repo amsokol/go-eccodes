@@ -34,14 +34,14 @@ RUN cd libpng-1.6.34 && \
     rm -r ./libpng-1.6.34
 
 # build and install libaec
-ADD ./contrib/libaec-1.0.1.tar.gz ./
-RUN cd libaec-1.0.1 && \
+ADD ./contrib/libaec-1.0.2.tar.gz ./
+RUN cd libaec-1.0.2 && \
     mkdir build && \
     cd build && \
     CFLAGS=-std=c99 ../configure --disable-shared && \
     make check install && \
     cd ../.. && \
-    rm -r ./libaec-1.0.1
+    rm -r ./libaec-1.0.2
 
 # build and install libjpeg
 ADD ./contrib/jpegsrc.v9b.tar.gz ./
