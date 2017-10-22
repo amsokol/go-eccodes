@@ -44,15 +44,15 @@ cd ..
 
 ```bash
 cd ./contrib
-tar -xzf libaec-1.0.1.tar.gz
-cd libaec-1.0.1
+tar -xzf libaec-1.0.2.tar.gz
+cd libaec-1.0.2
 mkdir build
 cd build
 ../configure --disable-shared
 make check
 sudo make install
 cd ../..
-rm -r ./libaec-1.0.1
+rm -r ./libaec-1.0.2
 cd ..
 ```
 
