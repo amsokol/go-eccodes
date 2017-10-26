@@ -7,8 +7,10 @@
       <w>cfile</w>
       <w>cfilename</w>
       <w>cfopen</w>
+      <w>cfree</w>
       <w>cint</w>
       <w>clong</w>
+      <w>cmalloc</w>
       <w>csize</w>
       <w>cstrerror</w>
       <w>culong</w>

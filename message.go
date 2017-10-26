@@ -20,6 +20,7 @@ type Message interface {
 	SetDouble(key string, value float64) error
 
 	Data() (latitudes []float64, longitudes []float64, values []float64, err error)
+	DataUnsafe() (latitudes *Float64ArrayUnsafe, longitudes *Float64ArrayUnsafe, values *Float64ArrayUnsafe, err error)
 
 	Close() error
 }
@@ -30,7 +31,7 @@ type message struct {
 
 func newMessage(h native.Ccodes_handle) Message {
 	m := &message{handle: h}
-	runtime.SetFinalizer(m, messageStubFinalizer)
+	runtime.SetFinalizer(m, messageFinalizer)
 
 	// set missing value to NaN
 	m.SetDouble(parameterMissingValue, math.NaN())
@@ -66,12 +67,20 @@ func (m *message) Data() (latitudes []float64, longitudes []float64, values []fl
 	return native.Ccodes_grib_get_data(m.handle)
 }
 
+func (m *message) DataUnsafe() (latitudes *Float64ArrayUnsafe, longitudes *Float64ArrayUnsafe, values *Float64ArrayUnsafe, err error) {
+	lats, lons, vals, err := native.Ccodes_grib_get_data_unsafe(m.handle)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return newFloat64ArrayUnsafe(lats), newFloat64ArrayUnsafe(lons), newFloat64ArrayUnsafe(vals), nil
+}
+
 func (m *message) Close() error {
 	defer func() { m.handle = nil }()
 	return native.Ccodes_handle_delete(m.handle)
 }
 
-func messageStubFinalizer(m *message) {
+func messageFinalizer(m *message) {
 	if m.isOpen() {
 		debug.MemoryLeakLogger.Print("message is not closed")
 		m.Close()

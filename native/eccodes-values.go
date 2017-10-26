@@ -128,3 +128,30 @@ func Ccodes_grib_get_data(handle Ccodes_handle) (latitudes []float64, longitudes
 
 	return latitudes, longitudes, values, nil
 }
+
+func Ccodes_grib_get_data_unsafe(handle Ccodes_handle) (latitudes unsafe.Pointer, longitudes unsafe.Pointer, values unsafe.Pointer, err error) {
+
+	size, err := Ccodes_get_long(handle, ParameterNumberOfPoints)
+	if err != nil {
+		return nil, nil, nil, errors.Wrapf(err, "failed to get long value of '%s'", ParameterNumberOfPoints)
+	}
+
+	latitudes = Cmalloc(CsizeT(size * SizeOfFloat64))
+	cLatitudes := (*C.double)(latitudes)
+
+	longitudes = Cmalloc(CsizeT(size * SizeOfFloat64))
+	cLongitudes := (*C.double)(longitudes)
+
+	values = Cmalloc(CsizeT(size * SizeOfFloat64))
+	cValues := (*C.double)(values)
+
+	res := C.codes_grib_get_data((*C.codes_handle)(handle), cLatitudes, cLongitudes, cValues)
+	if res != 0 {
+		Cfree(latitudes)
+		Cfree(longitudes)
+		Cfree(values)
+		return nil, nil, nil, errors.New(Cgrib_get_error_message(int(res)))
+	}
+
+	return latitudes, longitudes, values, nil
+}

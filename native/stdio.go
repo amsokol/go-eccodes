@@ -2,7 +2,6 @@ package native
 
 /*
 #include <stdio.h>
-#include <stdlib.h>
 */
 import "C"
 
@@ -14,10 +13,10 @@ import (
 
 func Cfopen(filename string, mode string) (CFILE, error) {
 	cFilename := C.CString(filename)
-	defer C.free(unsafe.Pointer(cFilename))
+	defer Cfree(unsafe.Pointer(cFilename))
 
 	cMode := C.CString(mode)
-	defer C.free(unsafe.Pointer(cMode))
+	defer Cfree(unsafe.Pointer(cMode))
 
 	file, err := C.fopen(cFilename, cMode)
 	if err != nil {

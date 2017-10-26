@@ -8,3 +8,5 @@ const (
 	ProductGTS
 	ProductTAF
 )
+
+const SizeOfFloat64 int64 = 8
