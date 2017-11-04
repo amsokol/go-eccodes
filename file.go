@@ -61,7 +61,7 @@ func OpenFileByPathWithFilter(path string, filter map[string]interface{}) (File,
 		}
 	}
 
-	i, err := native.Ccodes_index_new_from_file(nil, path, k)
+	i, err := native.Ccodes_index_new_from_file(native.DefaultContext, path, k)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create filtered index")
 	}
@@ -110,7 +110,7 @@ func OpenFileByPathWithFilter(path string, filter map[string]interface{}) (File,
 }
 
 func (f *file) Next() (Message, error) {
-	handle, err := native.Ccodes_handle_new_from_file(nil, f.file.Native(), native.ProductAny)
+	handle, err := native.Ccodes_handle_new_from_file(native.DefaultContext, f.file.Native(), native.ProductAny)
 	if err != nil {
 		if err == io.EOF {
 			return nil, err

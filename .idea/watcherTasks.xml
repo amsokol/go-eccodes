@@ -21,10 +21,11 @@
       </option>
       <option name="outputFromStdout" value="false" />
       <option name="program" value="$GoExecPath$" />
+      <option name="runOnExternalChanges" value="true" />
       <option name="scopeName" value="Project Files" />
       <option name="trackOnlyRoot" value="true" />
       <option name="workingDir" value="" />
-      <envs pass-parent-envs="false">
+      <envs>
         <env name="GOROOT" value="$GOROOT$" />
         <env name="GOPATH" value="$GOPATH$" />
         <env name="PATH" value="$GoBinDirs$" />

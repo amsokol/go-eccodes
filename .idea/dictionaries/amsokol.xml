@@ -21,10 +21,12 @@
       <w>grib</w>
       <w>kiter</w>
       <w>libaec</w>
+      <w>libeccodes</w>
       <w>libjasper</w>
       <w>libjpeg</w>
       <w>libopenjpeg</w>
       <w>libpng</w>
+      <w>msys</w>
       <w>nctx</w>
       <w>strerror</w>
       <w>zlib</w>
