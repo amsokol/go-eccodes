@@ -18,7 +18,7 @@ func main() {
 
 	flag.Parse()
 
-	// get all messages where level=2
+	// set filter: get 'tp' variable messages
 	filter := map[string]interface{}{
 		"shortNameECMF": "tp",
 	}
