@@ -220,4 +220,4 @@ make
 make install
 ```
 
-- set `ECCODES_DEFINITION_PATH` environment variable to `C:\Bin\msys64\mingw64\share\eccodes\definitions`
+- set `ECCODES_DEFINITION_PATH` environment variable to `<your_path>\msys64\mingw64\share\eccodes\definitions`
