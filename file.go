@@ -4,7 +4,7 @@ import (
 	"io"
 	"runtime"
 
-	"github.com/amsokol/go-errors"
+	"github.com/pkg/errors"
 
 	"github.com/amsokol/go-eccodes/debug"
 	cio "github.com/amsokol/go-eccodes/io"

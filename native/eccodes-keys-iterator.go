@@ -7,7 +7,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/amsokol/go-errors"
+	"github.com/pkg/errors"
 )
 
 func Ccodes_keys_iterator_new(handle Ccodes_handle, flags int, namespace string) Ccodes_keys_iterator {
