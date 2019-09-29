@@ -8,7 +8,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/amsokol/go-errors"
+	"github.com/pkg/errors"
 
 	"github.com/amsokol/go-eccodes"
 )

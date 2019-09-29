@@ -8,7 +8,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/amsokol/go-errors"
+	"github.com/pkg/errors"
 )
 
 func Ccodes_index_new_from_file(ctx Ccodes_context, filename string, keys string) (Ccodes_index, error) {
